@@ -16,18 +16,30 @@ export default function QuickStats() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Use inbox endpoint directly (stats endpoint has issues)
-        const inbox = await api.getInbox({ limit: 100 })
-        const pending = inbox.events.filter((e) => e.status === "pending").length
+        // Use stats endpoint which returns both pending and acknowledged counts
+        const stats = await api.getStats()
         
         setStats({
-          totalEvents: inbox.total || pending,
-          pendingEvents: pending,
-          acknowledgedEvents: 0, // Inbox only shows pending events
+          totalEvents: stats.total,
+          pendingEvents: stats.pending,
+          acknowledgedEvents: stats.acknowledged,
           apiStatus: "healthy",
         })
       } catch (err) {
-        setStats((prev) => ({ ...prev, apiStatus: "error" }))
+        // Fallback to inbox if stats fails
+        try {
+          const inbox = await api.getInbox({ limit: 100 })
+          const pending = inbox.events.filter((e) => e.status === "pending").length
+          
+          setStats({
+            totalEvents: inbox.total || pending,
+            pendingEvents: pending,
+            acknowledgedEvents: 0, // Inbox only shows pending events
+            apiStatus: "healthy",
+          })
+        } catch (fallbackErr) {
+          setStats((prev) => ({ ...prev, apiStatus: "error" }))
+        }
       }
     }
 
