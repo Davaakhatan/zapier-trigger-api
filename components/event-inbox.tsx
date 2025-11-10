@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ChevronRight, AlertCircle, CheckCircle2, Clock, Search, Filter, Copy, Check, RefreshCw, Inbox, Download, Trash2, CheckSquare, Square } from "lucide-react"
+import { ChevronRight, AlertCircle, CheckCircle2, Clock, Search, Filter, Copy, Check, RefreshCw, Inbox, Download, Trash2, CheckSquare, Square, Calendar, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { api, EventItem, APIError } from "@/lib/api"
 import { formatDistanceToNow } from "date-fns"
@@ -14,6 +14,10 @@ export default function EventInbox() {
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set())
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState<string | null>(null)
+  const [filterSource, setFilterSource] = useState<string | null>(null)
+  const [dateFrom, setDateFrom] = useState<string>("")
+  const [dateTo, setDateTo] = useState<string>("")
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [copied, setCopied] = useState<string | null>(null)
   const [events, setEvents] = useState<EventItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -181,13 +185,49 @@ export default function EventInbox() {
     }
   }
 
+  // Get unique sources from events
+  const uniqueSources = Array.from(new Set(events.map(e => e.source).filter(Boolean))) as string[]
+
   const filteredEvents = events.filter((event) => {
+    // Search filter
     const matchesSearch =
       (event.source?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       JSON.stringify(event.payload).toLowerCase().includes(searchTerm.toLowerCase())
+    
+    // Status filter
     const matchesStatus = !filterStatus || event.status === filterStatus
-    return matchesSearch && matchesStatus
+    
+    // Source filter
+    const matchesSource = !filterSource || event.source === filterSource
+    
+    // Date filters
+    let matchesDate = true
+    if (dateFrom || dateTo) {
+      const eventDate = new Date(event.timestamp)
+      if (dateFrom) {
+        const fromDate = new Date(dateFrom)
+        fromDate.setHours(0, 0, 0, 0)
+        if (eventDate < fromDate) matchesDate = false
+      }
+      if (dateTo) {
+        const toDate = new Date(dateTo)
+        toDate.setHours(23, 59, 59, 999)
+        if (eventDate > toDate) matchesDate = false
+      }
+    }
+    
+    return matchesSearch && matchesStatus && matchesSource && matchesDate
   })
+
+  const clearFilters = () => {
+    setSearchTerm("")
+    setFilterStatus(null)
+    setFilterSource(null)
+    setDateFrom("")
+    setDateTo("")
+  }
+
+  const hasActiveFilters = searchTerm || filterStatus || filterSource || dateFrom || dateTo
 
   const copyToClipboard = (text: any, id: string) => {
     navigator.clipboard.writeText(JSON.stringify(text, null, 2))
@@ -282,6 +322,15 @@ export default function EventInbox() {
               <span className="capitalize text-xs">Pending</span>
             </Button>
             <Button
+              variant={showAdvancedFilters ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className="gap-2"
+            >
+              <Filter className="w-4 h-4" />
+              Advanced
+            </Button>
+            <Button
               variant="outline"
               size="sm"
               onClick={fetchEvents}
@@ -293,6 +342,106 @@ export default function EventInbox() {
             </Button>
           </div>
         </div>
+
+        {/* Advanced Filters */}
+        {showAdvancedFilters && (
+          <div className="p-4 bg-muted/30 rounded-lg border border-border/50 space-y-3 animate-in slide-in-from-top-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-foreground">Advanced Filters</h3>
+              <div className="flex items-center gap-2">
+                {hasActiveFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearFilters}
+                    className="gap-2 h-7 text-xs"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    Clear All
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAdvancedFilters(false)}
+                  className="h-7"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {/* Source Filter */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Source</label>
+                <select
+                  value={filterSource || ""}
+                  onChange={(e) => setFilterSource(e.target.value || null)}
+                  className="w-full px-3 py-2 text-sm bg-card border border-border/50 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50"
+                >
+                  <option value="">All Sources</option>
+                  {uniqueSources.map((source) => (
+                    <option key={source} value={source}>
+                      {source}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/* Date From */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  From Date
+                </label>
+                <Input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="bg-card border-border/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              {/* Date To */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  To Date
+                </label>
+                <Input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  min={dateFrom || undefined}
+                  className="bg-card border-border/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+            {hasActiveFilters && (
+              <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
+                <span>Active filters:</span>
+                {filterStatus && (
+                  <Badge variant="outline" className="text-xs">
+                    Status: {filterStatus}
+                  </Badge>
+                )}
+                {filterSource && (
+                  <Badge variant="outline" className="text-xs">
+                    Source: {filterSource}
+                  </Badge>
+                )}
+                {dateFrom && (
+                  <Badge variant="outline" className="text-xs">
+                    From: {new Date(dateFrom).toLocaleDateString()}
+                  </Badge>
+                )}
+                {dateTo && (
+                  <Badge variant="outline" className="text-xs">
+                    To: {new Date(dateTo).toLocaleDateString()}
+                  </Badge>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Bulk Actions Bar */}
         {selectedEvents.size > 0 && (
@@ -447,7 +596,7 @@ export default function EventInbox() {
                             {formatTimestamp(event.timestamp)}
                           </span>
                         </div>
-                      </div>
+                    </div>
                   </div>
                   <ChevronRight
                       className={`w-5 h-5 text-muted-foreground transition-all duration-200 flex-shrink-0 group-hover:text-primary ${

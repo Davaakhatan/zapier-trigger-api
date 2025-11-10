@@ -1,6 +1,7 @@
 "use client"
 
 import { Zap } from "lucide-react"
+import ThemeToggle from "@/components/theme-toggle"
 
 export default function Header() {
   return (
@@ -18,6 +19,7 @@ export default function Header() {
               <p className="text-xs text-muted-foreground">Event Management Dashboard</p>
             </div>
           </div>
+          <ThemeToggle />
         </div>
       </div>
     </header>
