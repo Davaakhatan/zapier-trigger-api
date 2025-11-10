@@ -89,19 +89,42 @@ export default function QuickStats() {
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {statCards.map((stat, idx) => {
         const Icon = stat.icon
+        const isHealthy = stat.title === "API Status" && stats.apiStatus === "healthy"
         return (
-          <Card key={idx} className="bg-card border-border hover:border-primary/50 transition-colors">
-            <CardContent className="pt-6">
+          <Card
+            key={idx}
+            className="group relative overflow-hidden bg-card border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CardContent className="pt-6 relative">
               <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{stat.title}</p>
-                  <p className="text-2xl font-bold text-foreground mt-2">{stat.value}</p>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                    {stat.title}
+                  </p>
+                  <p className="text-3xl font-bold text-foreground mb-1 transition-transform duration-200 group-hover:scale-105">
+                    {stat.value}
+                  </p>
+                  {stat.title === "API Status" && (
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          isHealthy ? "bg-green-500 animate-pulse" : "bg-red-500"
+                        }`}
+                      />
+                      <span className="text-xs text-muted-foreground">
+                        {isHealthy ? "All systems operational" : "Service unavailable"}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div className={`${stat.color} p-2 rounded-lg bg-background`}>
-                  <Icon className="w-5 h-5" />
+                <div
+                  className={`${stat.color} p-3 rounded-xl bg-gradient-to-br from-background to-background/50 shadow-sm group-hover:scale-110 transition-transform duration-300`}
+                >
+                  <Icon className="w-6 h-6" />
                 </div>
               </div>
             </CardContent>

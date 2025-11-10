@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ChevronRight, AlertCircle, CheckCircle2, Clock, Search, Filter, Copy, Check, RefreshCw } from "lucide-react"
+import { ChevronRight, AlertCircle, CheckCircle2, Clock, Search, Filter, Copy, Check, RefreshCw, Inbox } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { api, EventItem, APIError } from "@/lib/api"
 import { formatDistanceToNow } from "date-fns"
@@ -114,10 +114,13 @@ export default function EventInbox() {
 
   if (loading && events.length === 0) {
     return (
-      <Card className="bg-card border-border">
-        <CardContent className="pt-6 text-center py-8">
-          <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-muted-foreground" />
-          <p className="text-muted-foreground">Loading events...</p>
+      <Card className="bg-card border-border/50 shadow-lg">
+        <CardContent className="pt-12 text-center py-16">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+            <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+          </div>
+          <p className="text-muted-foreground text-lg font-medium">Loading events...</p>
+          <p className="text-muted-foreground/70 text-sm mt-2">Please wait while we fetch your events</p>
         </CardContent>
       </Card>
     )
@@ -125,12 +128,15 @@ export default function EventInbox() {
 
   if (error && events.length === 0) {
     return (
-      <Card className="bg-card border-border">
-        <CardContent className="pt-6 text-center py-8">
-          <AlertCircle className="w-6 h-6 mx-auto mb-2 text-red-500" />
-          <p className="text-red-500 mb-4">{error}</p>
-          <Button onClick={fetchEvents} variant="outline" size="sm">
-            <RefreshCw className="w-4 h-4 mr-2" />
+      <Card className="bg-card border-border/50 shadow-lg">
+        <CardContent className="pt-12 text-center py-16">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-500/10 mb-4">
+            <AlertCircle className="w-8 h-8 text-red-500" />
+          </div>
+          <p className="text-red-500 mb-2 font-medium">{error}</p>
+          <p className="text-muted-foreground text-sm mb-6">Unable to load events from the server</p>
+          <Button onClick={fetchEvents} variant="outline" size="sm" className="gap-2">
+            <RefreshCw className="w-4 h-4" />
             Retry
           </Button>
         </CardContent>
@@ -142,10 +148,10 @@ export default function EventInbox() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <Input
             placeholder="Search by source or payload..."
-            className="pl-10 bg-card border-border"
+            className="pl-10 bg-card border-border/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -164,8 +170,9 @@ export default function EventInbox() {
             variant={filterStatus === "pending" ? "default" : "outline"}
             size="sm"
             onClick={() => setFilterStatus(filterStatus === "pending" ? null : "pending")}
-            className={filterStatus === "pending" ? getStatusBadge("pending") : ""}
+            className={`gap-2 ${filterStatus === "pending" ? getStatusBadge("pending") : ""}`}
           >
+            <Clock className="w-4 h-4" />
             <span className="capitalize text-xs">Pending</span>
           </Button>
           <Button
@@ -173,7 +180,7 @@ export default function EventInbox() {
             size="sm"
             onClick={fetchEvents}
             disabled={loading}
-            className="gap-2"
+            className="gap-2 hover:bg-accent transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             Refresh
@@ -181,56 +188,59 @@ export default function EventInbox() {
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {filteredEvents.length > 0 ? (
           filteredEvents.map((event) => (
             <Card
               key={event.id}
-              className="bg-card border-border cursor-pointer hover:border-primary/50 transition-colors"
+              className="group bg-card border-border/50 cursor-pointer hover:border-primary/50 hover:shadow-md transition-all duration-200 overflow-hidden"
               onClick={() => setSelectedEvent(selectedEvent === event.id ? null : event.id)}
             >
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <h3 className="font-mono text-sm font-semibold text-foreground">
-                        {event.id.substring(0, 8)}...
-                      </h3>
+                    <div className="flex items-center gap-3 mb-3 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                        <h3 className="font-mono text-sm font-semibold text-foreground">
+                          {event.id.substring(0, 8)}...
+                        </h3>
+                      </div>
                       {event.source && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs font-medium border-primary/20">
                           {event.source}
                         </Badge>
                       )}
-                      <div className="flex items-center gap-1 ml-auto">
+                      <div className="flex items-center gap-2 ml-auto">
                         {getStatusIcon(event.status)}
-                        <span className={`text-xs capitalize px-2 py-1 rounded ${getStatusBadge(event.status)}`}>
+                        <span className={`text-xs font-medium capitalize px-2.5 py-1 rounded-full ${getStatusBadge(event.status)}`}>
                           {event.status}
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>{formatTimestamp(event.timestamp)}</span>
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5" />
+                        {formatTimestamp(event.timestamp)}
+                      </span>
                     </div>
                   </div>
                   <ChevronRight
-                    className={`w-5 h-5 text-muted-foreground transition-transform flex-shrink-0 ${
-                      selectedEvent === event.id ? "rotate-90" : ""
+                    className={`w-5 h-5 text-muted-foreground transition-all duration-200 flex-shrink-0 group-hover:text-primary ${
+                      selectedEvent === event.id ? "rotate-90 text-primary" : ""
                     }`}
                   />
                 </div>
 
                 {selectedEvent === event.id && (
-                  <div className="mt-4 pt-4 border-t border-border space-y-4">
+                  <div className="mt-6 pt-6 border-t border-border/50 space-y-5 animate-in slide-in-from-top-2 duration-200">
                     <div>
-                      <p className="text-xs font-semibold text-foreground mb-2">Event Payload</p>
-                      <div className="relative">
-                        <div className="bg-background rounded p-3 font-mono text-xs text-muted-foreground overflow-x-auto">
-                          <pre>{JSON.stringify(event.payload, null, 2)}</pre>
-                        </div>
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-sm font-semibold text-foreground">Event Payload</p>
                         <Button
                           size="sm"
                           variant="outline"
-                          className="absolute top-2 right-2 gap-2 bg-transparent"
+                          className="gap-2 h-8 text-xs"
                           onClick={(e) => {
                             e.stopPropagation()
                             copyToClipboard(event.payload, event.id)
@@ -238,36 +248,41 @@ export default function EventInbox() {
                         >
                           {copied === event.id ? (
                             <>
-                              <Check className="w-4 h-4" />
+                              <Check className="w-3.5 h-3.5" />
                               Copied
                             </>
                           ) : (
                             <>
-                              <Copy className="w-4 h-4" />
+                              <Copy className="w-3.5 h-3.5" />
                               Copy
                             </>
                           )}
                         </Button>
                       </div>
+                      <div className="relative bg-muted/30 rounded-lg p-4 border border-border/50">
+                        <pre className="font-mono text-xs text-foreground/90 overflow-x-auto">
+                          {JSON.stringify(event.payload, null, 2)}
+                        </pre>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="p-2 rounded bg-background">
-                        <p className="text-muted-foreground">Status</p>
-                        <p className="font-semibold text-foreground capitalize">{event.status}</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 rounded-lg bg-muted/30 border border-border/50">
+                        <p className="text-xs text-muted-foreground mb-1.5">Status</p>
+                        <p className="text-sm font-semibold text-foreground capitalize">{event.status}</p>
                       </div>
-                      <div className="p-2 rounded bg-background">
-                        <p className="text-muted-foreground">Event ID</p>
-                        <p className="font-semibold text-foreground font-mono text-xs">{event.id}</p>
+                      <div className="p-3 rounded-lg bg-muted/30 border border-border/50">
+                        <p className="text-xs text-muted-foreground mb-1.5">Event ID</p>
+                        <p className="text-sm font-semibold text-foreground font-mono">{event.id}</p>
                       </div>
                     </div>
 
                     {event.status === "pending" && (
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 pt-2">
                         <Button
-                          variant="outline"
+                          variant="default"
                           size="sm"
-                          className="text-xs bg-transparent"
+                          className="gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all"
                           onClick={(e) => {
                             e.stopPropagation()
                             handleAcknowledge(event.id)
@@ -276,11 +291,14 @@ export default function EventInbox() {
                         >
                           {acknowledging === event.id ? (
                             <>
-                              <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                              <RefreshCw className="w-4 h-4 animate-spin" />
                               Acknowledging...
                             </>
                           ) : (
-                            "Acknowledge"
+                            <>
+                              <CheckCircle2 className="w-4 h-4" />
+                              Acknowledge Event
+                            </>
                           )}
                         </Button>
                       </div>
@@ -291,12 +309,18 @@ export default function EventInbox() {
             </Card>
           ))
         ) : (
-          <Card className="bg-card border-border">
-            <CardContent className="pt-6 text-center py-8">
-              <p className="text-muted-foreground">
+          <Card className="bg-card border-border/50 shadow-lg">
+            <CardContent className="pt-12 text-center py-16">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
+                <Inbox className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <p className="text-foreground font-medium mb-2">
+                {events.length === 0 ? "No events in inbox" : "No matching events"}
+              </p>
+              <p className="text-muted-foreground text-sm max-w-md mx-auto">
                 {events.length === 0
-                  ? "No events in inbox. Events will appear here when they are created."
-                  : "No events found matching your filters"}
+                  ? "Events will appear here when they are created via the API."
+                  : "Try adjusting your search or filter criteria."}
               </p>
             </CardContent>
           </Card>
