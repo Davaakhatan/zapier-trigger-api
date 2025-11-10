@@ -27,7 +27,7 @@ export default function QuickStats() {
           })
         } catch (statsError) {
           // Fallback: calculate from inbox (which we know works)
-          const inbox = await api.getInbox({ limit: 1000 })
+          const inbox = await api.getInbox({ limit: 100 })
           const pending = inbox.events.filter((e) => e.status === "pending").length
           // For acknowledged, we'll track locally or use a workaround
           // Since inbox only shows pending, we'll show pending count and estimate total
