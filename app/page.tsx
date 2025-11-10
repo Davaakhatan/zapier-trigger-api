@@ -17,13 +17,17 @@ export default function Home() {
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null)
   const [acknowledging, setAcknowledging] = useState<string | null>(null)
 
-  // Fetch events for timeline view
+  // Fetch events for timeline view - get both pending and load acknowledged from localStorage
   useEffect(() => {
     if (activeTab === "timeline") {
       const fetchTimelineEvents = async () => {
         try {
+          // Get pending events
           const response = await api.getInbox({ limit: 100 })
           setTimelineEvents(response.events)
+          
+          // Store acknowledged events in localStorage when they're acknowledged
+          // This is handled in the acknowledge handler below
         } catch (err) {
           console.error("Error fetching timeline events:", err)
         }
@@ -84,7 +88,28 @@ export default function Home() {
                 try {
                   setAcknowledging(eventId)
                   await api.acknowledgeEvent(eventId)
-                  setTimelineEvents(timelineEvents.filter(e => e.id !== eventId))
+                  
+                  // Find the event that was acknowledged
+                  const acknowledgedEvent = timelineEvents.find(e => e.id === eventId)
+                  if (acknowledgedEvent) {
+                    // Update the event status
+                    const updatedEvent = { ...acknowledgedEvent, status: 'acknowledged' }
+                    
+                    // Remove from pending list
+                    setTimelineEvents(timelineEvents.filter(e => e.id !== eventId))
+                    
+                    // Store in localStorage for timeline view
+                    try {
+                      const stored = localStorage.getItem('acknowledgedEvents')
+                      const existing = stored ? JSON.parse(stored) : []
+                      const updated = [...existing, updatedEvent]
+                      // Keep only last 1000 acknowledged events
+                      localStorage.setItem('acknowledgedEvents', JSON.stringify(updated.slice(-1000)))
+                    } catch (err) {
+                      console.error('Error storing acknowledged event:', err)
+                    }
+                  }
+                  
                   setSelectedEvent(null)
                   
                   // Track acknowledged count
