@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ChevronRight, AlertCircle, CheckCircle2, Clock, Search, Filter, Copy, Check, RefreshCw, Inbox, Download, Trash2, CheckSquare, Square, Calendar, X } from "lucide-react"
+import { ChevronRight, AlertCircle, CheckCircle2, Clock, Search, Filter, Copy, Check, RefreshCw, Inbox, Download, Trash2, CheckSquare, Square, Calendar, X, ChevronLeft, Play, Pause } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { api, EventItem, APIError } from "@/lib/api"
 import { formatDistanceToNow } from "date-fns"
@@ -24,6 +24,9 @@ export default function EventInbox() {
   const [error, setError] = useState<string | null>(null)
   const [acknowledging, setAcknowledging] = useState<string | null>(null)
   const [bulkAcknowledging, setBulkAcknowledging] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(20)
+  const [autoRefresh, setAutoRefresh] = useState(true)
 
   const fetchEvents = async () => {
     try {
@@ -45,9 +48,11 @@ export default function EventInbox() {
 
   useEffect(() => {
     fetchEvents()
-    const interval = setInterval(fetchEvents, 30000)
-    return () => clearInterval(interval)
-  }, [])
+    if (autoRefresh) {
+      const interval = setInterval(fetchEvents, 30000)
+      return () => clearInterval(interval)
+    }
+  }, [autoRefresh])
 
   const handleAcknowledge = async (eventId: string) => {
     try {
@@ -228,6 +233,17 @@ export default function EventInbox() {
   }
 
   const hasActiveFilters = searchTerm || filterStatus || filterSource || dateFrom || dateTo
+
+  // Pagination
+  const totalPages = Math.ceil(filteredEvents.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedEvents = filteredEvents.slice(startIndex, endIndex)
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, filterStatus, filterSource, dateFrom, dateTo])
 
   const copyToClipboard = (text: any, id: string) => {
     navigator.clipboard.writeText(JSON.stringify(text, null, 2))
@@ -484,8 +500,8 @@ export default function EventInbox() {
           </div>
         )}
 
-        {/* Export Actions */}
-        <div className="flex items-center justify-between">
+        {/* Export Actions and Controls */}
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2">
             {filteredEvents.length > 0 && (
               <div className="flex gap-2">
@@ -510,8 +526,31 @@ export default function EventInbox() {
               </div>
             )}
           </div>
-          <div className="text-sm text-muted-foreground">
-            {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                className="gap-2"
+                title={autoRefresh ? "Auto-refresh enabled (30s)" : "Auto-refresh disabled"}
+              >
+                {autoRefresh ? (
+                  <>
+                    <Pause className="w-4 h-4" />
+                    <span className="hidden sm:inline text-xs">Auto-refresh ON</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4" />
+                    <span className="hidden sm:inline text-xs">Auto-refresh OFF</span>
+                  </>
+                )}
+              </Button>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Showing {startIndex + 1}-{Math.min(endIndex, filteredEvents.length)} of {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''}
+            </div>
           </div>
         </div>
       </div>
@@ -536,7 +575,7 @@ export default function EventInbox() {
         )}
 
         {filteredEvents.length > 0 ? (
-          filteredEvents.map((event) => {
+          paginatedEvents.map((event) => {
             const isSelected = selectedEvents.has(event.id)
             const isPending = event.status === 'pending'
             
@@ -678,11 +717,62 @@ export default function EventInbox() {
                     )}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+            </CardContent>
+          </Card>
             )
           })
-        ) : (
+        ) : null}
+
+        {/* Pagination */}
+        {filteredEvents.length > 0 && totalPages > 1 && (
+          <div className="flex items-center justify-between pt-4 border-t border-border/50">
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-muted-foreground">Items per page:</label>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value))
+                  setCurrentPage(1)
+                }}
+                className="px-2 py-1 text-xs bg-card border border-border/50 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="gap-2"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Previous
+              </Button>
+              <div className="flex items-center gap-1 px-3">
+                <span className="text-sm text-muted-foreground">
+                  Page {currentPage} of {totalPages}
+                </span>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="gap-2"
+              >
+                Next
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {filteredEvents.length === 0 && (
           <Card className="bg-card border-border/50 shadow-lg">
             <CardContent className="pt-12 text-center py-16">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">

@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, Inbox, BookOpen } from "lucide-react"
+import { LayoutDashboard, Inbox, BookOpen, Clock } from "lucide-react"
 
 interface NavigationProps {
   activeTab: string
@@ -12,6 +12,7 @@ export default function Navigation({ activeTab, setActiveTab }: NavigationProps)
   const tabs = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "inbox", label: "Inbox", icon: Inbox },
+    { id: "timeline", label: "Timeline", icon: Clock },
     { id: "docs", label: "API Docs", icon: BookOpen },
   ]
 
