@@ -43,7 +43,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Python
+# Python (if any Python tools are used in frontend)
 __pycache__/
 *.py[cod]
 *$py.class
@@ -53,14 +53,6 @@ venv/
 env/
 ENV/
 .venv
-
-# AWS/Lambda deployment artifacts
-backend/lambda-package/
-backend/layer-package/
-backend/lambda-deployment.zip
-backend/layer.zip
-backend/test_extract/
-*.zip
 
 # AWS credentials (never commit!)
 .aws/
