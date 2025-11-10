@@ -16,9 +16,76 @@
 https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod
 ```
 
+**Your Repository:**
+```
+https://github.com/Davaakhatan/zapier-trigger-api
+```
+
 ---
 
-## Option 1: Deploy via AWS Amplify Console (Recommended)
+## 🚀 Quick Deployment Steps
+
+### Step 1: Open AWS Amplify Console
+
+Go to: **https://console.aws.amazon.com/amplify**
+
+### Step 2: Create New App
+
+1. Click **"New app"** button (top right)
+2. Select **"Host web app"**
+
+### Step 3: Connect Repository
+
+1. **Choose Git provider**: Click **"GitHub"** (or your provider)
+2. **Authorize**: Click **"Authorize"** if this is your first time
+   - You'll be redirected to GitHub to authorize AWS Amplify
+   - Click **"Authorize aws-amplify-console"**
+3. **Select repository**: 
+   - Find and select: **`Davaakhatan/zapier-trigger-api`**
+4. **Select branch**: 
+   - Choose: **`main`**
+5. Click **"Next"**
+
+### Step 4: Configure Build Settings
+
+**App name**: `zapier-triggers-frontend`
+
+**Build settings**: Amplify should auto-detect `amplify.yml` ✅
+
+**Environment variables**: Click **"Add environment variable"**
+- **Key**: `NEXT_PUBLIC_API_URL`
+- **Value**: `https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod`
+- Click **"Save"**
+
+Click **"Next"**
+
+### Step 5: Review and Deploy
+
+1. **Review** all settings
+2. Click **"Save and deploy"**
+
+### Step 6: Wait for Build
+
+- Build will start automatically
+- Takes **5-10 minutes**
+- Watch progress in real-time
+- You'll see:
+  - ✅ Provision
+  - ✅ Build
+  - ✅ Deploy
+  - ✅ Verify
+
+### Step 7: Get Your App URL
+
+Once complete, you'll see:
+- **App URL**: `https://main.xxxxx.amplifyapp.com`
+- **Status**: ✅ Deployed
+
+---
+
+## Detailed Deployment Options
+
+### Option 1: Deploy via AWS Amplify Console (Recommended)
 
 ### Step 1: Prepare Environment Variable
 
@@ -319,7 +386,42 @@ amplify publish
 
 ---
 
+---
+
+## 🧪 Test Your Deployment
+
+1. **Open your Amplify URL**
+2. **Test the frontend**:
+   - Navigate to Event Inbox
+   - Create a test event
+   - Verify it appears
+   - Acknowledge the event
+   - Verify it disappears
+
+---
+
+## 🔄 Automatic Deployments
+
+After first deployment:
+- ✅ **Every `git push`** will trigger a new build
+- ✅ **Build automatically** in Amplify
+- ✅ **Deploy automatically** when build succeeds
+
+---
+
+## ✅ Success Checklist
+
+- [ ] Repository connected to Amplify
+- [ ] Environment variable `NEXT_PUBLIC_API_URL` set
+- [ ] Build completed successfully
+- [ ] App URL accessible
+- [ ] Frontend connects to API
+- [ ] Events can be created and acknowledged
+- [ ] CORS updated with Amplify URL
+
+---
+
 **Ready to deploy!** 🚀
 
-Choose Option 1 (Console) for easiest setup, or Option 2 (CLI) for more control.
+Go to https://console.aws.amazon.com/amplify and follow the quick steps above, or use the detailed options below for more control.
 

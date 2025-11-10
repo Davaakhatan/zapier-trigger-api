@@ -1,24 +1,18 @@
-# Zapier Triggers API
+# Zapier Triggers API - Frontend
 
-A unified RESTful API for real-time event-driven automation on the Zapier platform.
+Next.js frontend dashboard for the Zapier Triggers API.
 
 ## Overview
 
-The Zapier Triggers API enables any external system to send events into Zapier via a standardized RESTful interface. This allows for real-time, event-driven workflows instead of relying solely on scheduled or manual triggers.
+This is the **frontend repository** for visualizing and managing events from the Zapier Triggers API. The backend API is in a separate repository.
+
+**Backend Repository**: https://github.com/Davaakhatan/zapier-trigger-api-backend
 
 ## Project Structure
 
 ```
 .
-├── backend/              # Python FastAPI backend (main application)
-│   ├── src/             # Source code
-│   │   ├── api/         # API routes
-│   │   ├── core/        # Core functionality (config, database, exceptions)
-│   │   └── models/      # Pydantic models
-│   ├── tests/           # Test files
-│   ├── main.py          # Application entry point
-│   └── requirements.txt # Python dependencies
-├── app/                  # Next.js frontend dashboard
+├── app/                  # Next.js app directory
 │   ├── layout.tsx       # Root layout
 │   ├── page.tsx         # Main page
 │   └── globals.css      # Global styles
@@ -30,242 +24,124 @@ The Zapier Triggers API enables any external system to send events into Zapier v
 ├── lib/                  # Utilities
 │   ├── api.ts           # API client
 │   └── utils.ts         # Helper functions
-├── docs/                 # Project documentation
-│   ├── PRD.md           # Product Requirements Document
-│   ├── ARCHITECTURE.md  # System architecture documentation
-│   ├── PHASES.md        # Implementation phases
-│   └── TASKS.md         # Detailed task list
-├── memory-bank/          # Project context and memory bank
-│   ├── projectbrief.md
-│   ├── productContext.md
-│   ├── systemPatterns.md
-│   ├── techContext.md
-│   ├── activeContext.md
-│   └── progress.md
-└── .cursor/
-    └── rules/           # Cursor AI rules for this project
+├── docs/                 # Documentation
+│   ├── FRONTEND_DEPLOYMENT.md
+│   └── ...
+├── amplify.yml          # AWS Amplify build config
+└── package.json         # Dependencies
 ```
 
 ## Quick Start
 
 ### Prerequisites
 
-- Python 3.9+ (for backend)
-- Node.js 18+ and pnpm (for frontend)
-- AWS CLI configured
-- Docker (for local development)
-- Git
+- Node.js 18+ and pnpm installed
+- Backend API running (or use deployed API)
 
 ### Local Development
 
-#### Backend (Python FastAPI)
-
-1. **Navigate to backend directory**
-   ```bash
-   cd backend
-   ```
-
-2. **Set up virtual environment**
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   pip install -r requirements-dev.txt
-   ```
-
-4. **Run the backend**
-   ```bash
-   uvicorn main:app --reload --host 0.0.0.0 --port 8000
-   ```
-
-#### Frontend (Next.js)
-
-1. **Install dependencies** (from project root)
+1. **Install dependencies**
    ```bash
    pnpm install
-   # or
-   npm install
    ```
 
-2. **Run the frontend**
+2. **Run development server**
    ```bash
    pnpm dev
-   # or
-   npm run dev
    ```
 
 3. **Access the application**
    - Frontend Dashboard: http://localhost:3000
-   - Backend API Docs: http://localhost:8000/docs
-   - Backend Health: http://localhost:8000/health
+
+### Configure API Endpoint
+
+The frontend connects to the backend API. By default, it uses:
+- Local development: `http://localhost:8000`
+- Production: Set via `NEXT_PUBLIC_API_URL` environment variable
+
+To use a different backend URL, create `.env.local`:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+Or use the deployed API:
+```env
+NEXT_PUBLIC_API_URL=https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod
+```
+
+## Features
+
+- **Dashboard**: Overview with stats
+- **Inbox**: View and manage pending events
+- **API Docs**: Integration documentation
+- **Real-time**: Auto-refreshes every 30 seconds
 
 ## Documentation
 
+- **[GETTING_STARTED.md](GETTING_STARTED.md)**: Quick start guide
+- **[docs/FRONTEND_DEPLOYMENT.md](docs/FRONTEND_DEPLOYMENT.md)**: AWS Amplify deployment guide
+- **[REPOSITORIES.md](REPOSITORIES.md)**: Repository structure and workflow
 - **[docs/PRD.md](docs/PRD.md)**: Product Requirements Document
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**: System architecture and design
-- **[docs/PHASES.md](docs/PHASES.md)**: Implementation phases and timeline
-- **[docs/TASKS.md](docs/TASKS.md)**: Detailed task breakdown
-- **[docs/STATUS.md](docs/STATUS.md)**: Quick project status reference
-- **[docs/COMPARISON.md](docs/COMPARISON.md)**: Built vs. Requirements comparison
-- **[docs/AWS_DEPLOYMENT.md](docs/AWS_DEPLOYMENT.md)**: Complete AWS deployment guide
-- **[docs/API_GATEWAY_SETUP.md](docs/API_GATEWAY_SETUP.md)**: Step-by-step API Gateway setup guide
-- **[QUICK_DEPLOY.md](QUICK_DEPLOY.md)**: Quick deployment guide
-- **[memory-bank/](memory-bank/)**: Project context and memory bank
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**: System architecture
 
-## AWS Deployment
+## Deployment
 
-### Quick Start
+### AWS Amplify
 
-1. **Set up AWS infrastructure:**
-   ```bash
-   ./scripts/setup-aws.sh
-   ```
+Deploy to AWS Amplify using the guide:
+- **[docs/FRONTEND_DEPLOYMENT.md](docs/FRONTEND_DEPLOYMENT.md)**
 
-2. **Deploy backend (Lambda):**
-   ```bash
-   ./scripts/deploy-lambda.sh
-   ```
+**Quick Steps:**
+1. Push code to GitHub
+2. Connect repository to AWS Amplify
+3. Set environment variable: `NEXT_PUBLIC_API_URL`
+4. Deploy!
 
-3. **Set up API Gateway** (see [QUICK_DEPLOY.md](QUICK_DEPLOY.md))
+## API Connection
 
-4. **Deploy frontend** (see [QUICK_DEPLOY.md](QUICK_DEPLOY.md))
+This frontend connects to the backend API:
 
-### Detailed Guides
-
-- **[QUICK_DEPLOY.md](QUICK_DEPLOY.md)**: Step-by-step deployment guide
-- **[docs/AWS_DEPLOYMENT.md](docs/AWS_DEPLOYMENT.md)**: Complete AWS deployment documentation with all options
-
-## API Endpoints
-
-All endpoints are prefixed with `/v1`.
-
-### POST /v1/events
-Ingest a new event.
-
-**Request**:
-```json
-{
-  "payload": {
-    "key": "value"
-  },
-  "source": "optional-source-identifier",
-  "tags": ["tag1", "tag2"]
-}
+**API Endpoint:**
+```
+https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod
 ```
 
-**Response** (201 Created):
-```json
-{
-  "event_id": "550e8400-e29b-41d4-a716-446655440000",
-  "status": "created",
-  "timestamp": "2025-01-27T12:00:00Z",
-  "message": "Event ingested successfully"
-}
+**Backend Repository:**
 ```
-
-### GET /v1/events/inbox
-Retrieve undelivered events.
-
-**Query Parameters**:
-- `limit` (optional): Number of events (default: 50, max: 100)
-- `offset` (optional): Pagination offset
-- `source` (optional): Filter by source
-- `since` (optional): ISO 8601 timestamp
-
-**Response** (200 OK):
-```json
-{
-  "events": [...],
-  "total": 100,
-  "limit": 50,
-  "offset": 0
-}
-```
-
-### POST /events/{id}/ack
-Acknowledge receipt of an event.
-
-**Response** (200 OK):
-```json
-{
-  "event_id": "550e8400-e29b-41d4-a716-446655440000",
-  "status": "acknowledged",
-  "message": "Event acknowledged successfully"
-}
+https://github.com/Davaakhatan/zapier-trigger-api-backend
 ```
 
 ## Development
 
-### Running Tests
+### Available Scripts
 
 ```bash
-cd backend
-source venv/bin/activate
+# Development server
+pnpm dev
 
-# Run all tests
-pytest
+# Build for production
+pnpm build
 
-# Run with coverage
-pytest --cov=src --cov-report=html
-
-# Run specific test file
-pytest tests/test_events.py
-```
-
-### Code Quality
-
-```bash
-cd backend
-source venv/bin/activate
-
-# Format code
-black src/ tests/
+# Start production server
+pnpm start
 
 # Lint code
-ruff check src/ tests/
-
-# Type check
-mypy src/
+pnpm lint
 ```
 
-### Infrastructure
+### Project Status
 
-```bash
-# Deploy infrastructure (Terraform)
-cd infrastructure
-terraform init
-terraform plan
-terraform apply
-
-# Or with CDK
-cdk deploy
-```
-
-## Project Status
-
-**Current Phase**: Phase 2 - Core API Implementation  
-**Progress**: Backend API Complete ✅
-
-- ✅ Python FastAPI backend implemented
-- ✅ All 3 core endpoints working
-- ✅ DynamoDB integration ready
-- ✅ Error handling and validation
-- ⏳ AWS infrastructure (Phase 5)
-- ⏳ Authentication (Phase 3)
-- ⏳ Testing (Phase 4)
-
-See [docs/TASKS.md](docs/TASKS.md) for detailed task status.
+- ✅ Next.js frontend implemented
+- ✅ Event inbox component
+- ✅ API client integration
+- ✅ Real-time updates
+- ✅ AWS Amplify deployment ready
 
 ## Contributing
 
 1. Read the [memory-bank](memory-bank/) documentation
-2. Follow the coding standards in [.cursor/rules](.cursor/rules/)
-3. Write tests for new features
-4. Update documentation as needed
+2. Follow coding standards
+3. Update documentation as needed
 
 ## License
 
@@ -275,4 +151,3 @@ See [docs/TASKS.md](docs/TASKS.md) for detailed task status.
 
 **Organization**: Zapier  
 **Project ID**: K1oUUDeoZrvJkVZafqHL_1761943818847
-

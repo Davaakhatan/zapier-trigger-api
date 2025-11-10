@@ -1,66 +1,65 @@
-# Getting Started: Full Stack Application
+# Getting Started: Frontend Application
 
 ## 🎯 Overview
 
-This project consists of:
-- **Backend**: Python FastAPI REST API (required by PRD)
-- **Frontend**: Next.js dashboard (optional, for visualization)
+This is the **frontend repository** for the Zapier Triggers API.
+
+- **Frontend**: Next.js dashboard for visualizing and managing events
+- **Backend**: Separate repository at https://github.com/Davaakhatan/zapier-trigger-api-backend
 
 ## 🚀 Quick Start
 
-### Terminal 1: Backend (Python FastAPI)
+### Prerequisites
+
+- Node.js 18+ and pnpm installed
+- Backend API running (or use deployed API)
+
+### Run Frontend Locally
 
 ```bash
-cd backend
-source venv/bin/activate
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-
-**Backend will be available at:**
-- API: http://localhost:8000
-- Docs: http://localhost:8000/docs
-- Health: http://localhost:8000/health
-
-### Terminal 2: Frontend (Next.js)
-
-```bash
-# From project root
+# Install dependencies
 pnpm install
+
+# Run development server
 pnpm dev
 ```
 
 **Frontend will be available at:**
 - Dashboard: http://localhost:3000
 
-## 📝 Testing the Integration
+### Configure API Endpoint
 
-### 1. Create an Event (via API)
+The frontend connects to the backend API. By default, it uses:
+- Local development: `http://localhost:8000`
+- Production: Set via `NEXT_PUBLIC_API_URL` environment variable
 
-```bash
-curl -X POST "http://localhost:8000/v1/events" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "payload": {
-      "orderId": "12345",
-      "amount": 299.99,
-      "customer": "John Doe"
-    },
-    "source": "payment-system",
-    "tags": ["order", "payment"]
-  }'
+To use a different backend URL, create `.env.local`:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-### 2. View Events in Frontend
+Or use the deployed API:
+```env
+NEXT_PUBLIC_API_URL=https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod
+```
+
+## 📝 Testing the Application
+
+### 1. View Events in Frontend
 
 1. Open http://localhost:3000
 2. Click on "Inbox" tab
-3. You should see the event you just created!
+3. View pending events from the backend API
 
-### 3. Acknowledge an Event
+### 2. Acknowledge an Event
 
 - Click on an event in the inbox
 - Click "Acknowledge" button
 - The event will be removed from the pending list
+
+### 3. Create Events
+
+Use the backend API to create events (see backend repository documentation).
 
 ## 🎨 Frontend Features
 
@@ -75,34 +74,31 @@ curl -X POST "http://localhost:8000/v1/events" \
 - **Frontend is optional**: The PRD doesn't require a frontend, but it's useful for visualization
 - **Frontend connects to backend**: All data comes from the Python FastAPI API
 
-## 🔧 Configuration
+## 🎨 Frontend Features
 
-### Backend
+- **Dashboard**: Overview with stats
+- **Inbox**: View and manage pending events (connected to backend API)
+- **API Docs**: Integration documentation
+- **Real-time**: Auto-refreshes every 30 seconds
 
-Create `backend/.env` (optional):
-```env
-DEBUG=true
-AWS_REGION=us-east-1
-DYNAMODB_TABLE_NAME=zapier-triggers-events
-```
+## 🔗 Backend Connection
 
-### Frontend
-
-The frontend automatically connects to `http://localhost:8000` by default.
-
-To use a different backend URL, create `.env.local`:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
+This frontend connects to the backend API. The backend is in a separate repository:
+- **Backend Repo**: https://github.com/Davaakhatan/zapier-trigger-api-backend
+- **API Endpoint**: https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod
 
 ## ✅ What's Working
 
-- ✅ Backend API (Python FastAPI) - PRD compliant
-- ✅ Frontend Dashboard (Next.js) - Connected to backend
-- ✅ Event ingestion, retrieval, and acknowledgment
+- ✅ Frontend Dashboard (Next.js)
+- ✅ Event retrieval and acknowledgment
 - ✅ Real-time updates
+- ✅ Connected to backend API
+
+## 🚀 Deployment
+
+See [docs/FRONTEND_DEPLOYMENT.md](docs/FRONTEND_DEPLOYMENT.md) for deployment to AWS Amplify.
 
 ## 🎉 You're All Set!
 
-Both frontend and backend are now working together!
+Your frontend is ready to use!
 
