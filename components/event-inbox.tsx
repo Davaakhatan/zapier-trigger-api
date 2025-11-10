@@ -531,7 +531,8 @@ export default function EventInbox() {
                 )}
               </CardContent>
             </Card>
-          ))
+            )
+          })
         ) : (
           <Card className="bg-card border-border/50 shadow-lg">
             <CardContent className="pt-12 text-center py-16">
