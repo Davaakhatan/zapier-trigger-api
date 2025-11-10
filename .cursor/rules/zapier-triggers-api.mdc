@@ -1,0 +1,75 @@
+Description: Core rules for Zapier Triggers API development
+Globs: **/*.py
+
+# Zapier Triggers API Development Rules
+
+## Project Context
+This is the Zapier Triggers API project - a unified RESTful API for real-time event ingestion and processing. The project uses Python 3.11+, FastAPI, and AWS services.
+
+## Code Standards
+
+### Python Style
+- Use Python 3.11+ features
+- Follow PEP 8 style guide
+- Use type hints for all function signatures
+- Use async/await for I/O operations
+- Format code with `black`
+- Lint with `ruff`
+- Type check with `mypy`
+
+### FastAPI Patterns
+- Use Pydantic models for request/response validation
+- Use dependency injection for shared resources (DB clients, config)
+- Use router modules for endpoint organization
+- Return proper HTTP status codes
+- Use structured error responses
+
+### AWS Integration
+- Use boto3 for AWS service interactions
+- Handle AWS service errors gracefully
+- Use environment variables for configuration
+- Support LocalStack for local development
+
+### Testing
+- Write unit tests for all business logic
+- Use pytest for testing framework
+- Mock AWS services with moto
+- Achieve > 80% code coverage
+- Test error scenarios
+
+## Architecture Patterns
+
+### API Endpoints
+- `/events` (POST): Ingest events
+- `/inbox` (GET): Retrieve pending events
+- `/events/{id}/ack` (POST): Acknowledge events
+
+### Data Storage
+- DynamoDB for event persistence
+- Use GSI for querying by status
+- Event ID as partition key (UUID v4)
+
+### Error Handling
+- Use custom exception classes
+- Return structured error responses
+- Log errors with context
+- Use appropriate HTTP status codes
+
+## Security
+- Validate all inputs
+- Sanitize user data
+- Use API key authentication
+- Implement rate limiting
+- Add security headers
+
+## Performance
+- Target < 100ms response time for ingestion
+- Use async operations where possible
+- Optimize DynamoDB queries
+- Implement pagination for list endpoints
+
+## Documentation
+- Document all public functions
+- Include examples in docstrings
+- Keep API documentation up to date
+- Update memory bank when patterns change
