@@ -40,6 +40,12 @@ export interface AcknowledgeResponse {
   message: string
 }
 
+export interface StatsResponse {
+  pending: number
+  acknowledged: number
+  total: number
+}
+
 export interface ErrorResponse {
   error: string
   message: string
@@ -116,6 +122,13 @@ export const api = {
     return fetchAPI<AcknowledgeResponse>(`/v1/events/${eventId}/ack`, {
       method: 'POST',
     })
+  },
+
+  /**
+   * Get event statistics
+   */
+  async getStats(): Promise<StatsResponse> {
+    return fetchAPI<StatsResponse>('/v1/events/stats')
   },
 
   /**

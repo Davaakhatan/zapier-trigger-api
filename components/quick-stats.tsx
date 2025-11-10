@@ -16,14 +16,12 @@ export default function QuickStats() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const inbox = await api.getInbox({ limit: 100 })
-        const pending = inbox.events.filter((e) => e.status === "pending").length
-        const acknowledged = inbox.events.filter((e) => e.status === "acknowledged").length
+        const stats = await api.getStats()
 
         setStats({
-          totalEvents: inbox.total,
-          pendingEvents: pending,
-          acknowledgedEvents: acknowledged,
+          totalEvents: stats.total,
+          pendingEvents: stats.pending,
+          acknowledgedEvents: stats.acknowledged,
           apiStatus: "healthy",
         })
       } catch (err) {
