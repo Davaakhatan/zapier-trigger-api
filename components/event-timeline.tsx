@@ -3,9 +3,10 @@
 import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Clock, CheckCircle2 } from "lucide-react"
+import { Clock, CheckCircle2, ExternalLink } from "lucide-react"
 import { EventItem } from "@/lib/api"
 import { formatDistanceToNow } from "date-fns"
+import { Button } from "@/components/ui/button"
 
 interface EventTimelineProps {
   events: EventItem[]
@@ -85,6 +86,17 @@ export default function EventTimeline({ events, onEventClick }: EventTimelinePro
                         <div className="mt-2 text-sm text-foreground/80 line-clamp-2">
                           {JSON.stringify(event.payload).substring(0, 100)}...
                         </div>
+                      </div>
+                      <div className="flex-shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEventClick?.(event)}
+                          className="gap-2"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          View
+                        </Button>
                       </div>
                     </div>
                   </CardContent>

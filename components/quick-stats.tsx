@@ -13,6 +13,13 @@ export default function QuickStats() {
     apiStatus: "unknown",
   })
 
+  const [animatedStats, setAnimatedStats] = useState({
+    totalEvents: 0,
+    pendingEvents: 0,
+    acknowledgedEvents: 0,
+    apiStatus: "unknown",
+  })
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -61,30 +68,70 @@ export default function QuickStats() {
     }
   }, [])
 
+  // Animate number changes
+  useEffect(() => {
+    const duration = 500
+    const steps = 20
+    const stepDuration = duration / steps
+    
+    const keys: (keyof typeof stats)[] = ['totalEvents', 'pendingEvents', 'acknowledgedEvents']
+    
+    keys.forEach((key) => {
+      const start = animatedStats[key] as number
+      const end = stats[key] as number
+      const diff = end - start
+      
+      if (diff === 0) return
+      
+      let currentStep = 0
+      const timer = setInterval(() => {
+        currentStep++
+        const progress = currentStep / steps
+        const current = Math.round(start + diff * progress)
+        
+        setAnimatedStats((prev) => ({
+          ...prev,
+          [key]: current,
+        }))
+        
+        if (currentStep >= steps) {
+          clearInterval(timer)
+        }
+      }, stepDuration)
+      
+      return () => clearInterval(timer)
+    })
+    
+    setAnimatedStats((prev) => ({
+      ...prev,
+      apiStatus: stats.apiStatus,
+    }))
+  }, [stats])
+
   const statCards = [
     {
       title: "Total Events",
-      value: stats.totalEvents.toLocaleString(),
+      value: animatedStats.totalEvents.toLocaleString(),
       icon: Zap,
       color: "text-blue-500 dark:text-blue-400",
     },
     {
       title: "Pending Events",
-      value: stats.pendingEvents.toLocaleString(),
+      value: animatedStats.pendingEvents.toLocaleString(),
       icon: Clock,
       color: "text-yellow-500 dark:text-yellow-400",
     },
     {
       title: "Acknowledged",
-      value: stats.acknowledgedEvents.toLocaleString(),
+      value: animatedStats.acknowledgedEvents.toLocaleString(),
       icon: CheckCircle2,
       color: "text-green-500 dark:text-green-400",
     },
     {
       title: "API Status",
-      value: stats.apiStatus === "healthy" ? "Healthy" : "Error",
+      value: animatedStats.apiStatus === "healthy" ? "Healthy" : "Error",
       icon: Activity,
-      color: stats.apiStatus === "healthy" ? "text-green-500 dark:text-green-400" : "text-red-500 dark:text-red-400",
+      color: animatedStats.apiStatus === "healthy" ? "text-green-500 dark:text-green-400" : "text-red-500 dark:text-red-400",
     },
   ]
 

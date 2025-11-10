@@ -7,13 +7,15 @@ import QuickStats from "@/components/quick-stats"
 import Header from "@/components/header"
 import Navigation from "@/components/navigation"
 import EventTimeline from "@/components/event-timeline"
-import { api } from "@/lib/api"
+import EventDetailsModal from "@/components/event-details-modal"
+import { api, EventItem, APIError } from "@/lib/api"
 import { useEffect } from "react"
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("dashboard")
-  const [timelineEvents, setTimelineEvents] = useState<any[]>([])
-  const [selectedEvent, setSelectedEvent] = useState<any | null>(null)
+  const [timelineEvents, setTimelineEvents] = useState<EventItem[]>([])
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null)
+  const [acknowledging, setAcknowledging] = useState<string | null>(null)
 
   // Fetch events for timeline view
   useEffect(() => {
@@ -74,6 +76,32 @@ export default function Home() {
             <EventTimeline 
               events={timelineEvents} 
               onEventClick={(event) => setSelectedEvent(event)}
+            />
+            <EventDetailsModal
+              event={selectedEvent}
+              onClose={() => setSelectedEvent(null)}
+              onAcknowledge={async (eventId) => {
+                try {
+                  setAcknowledging(eventId)
+                  await api.acknowledgeEvent(eventId)
+                  setTimelineEvents(timelineEvents.filter(e => e.id !== eventId))
+                  setSelectedEvent(null)
+                  
+                  // Track acknowledged count
+                  const currentCount = parseInt(localStorage.getItem('acknowledgedCount') || '0', 10)
+                  localStorage.setItem('acknowledgedCount', String(currentCount + 1))
+                  window.dispatchEvent(new CustomEvent('eventAcknowledged'))
+                } catch (err) {
+                  if (err instanceof APIError) {
+                    alert(`Failed to acknowledge event: ${err.message}`)
+                  } else {
+                    alert("Failed to acknowledge event")
+                  }
+                } finally {
+                  setAcknowledging(null)
+                }
+              }}
+              acknowledging={acknowledging}
             />
           </div>
         )}
