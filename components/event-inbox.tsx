@@ -49,6 +49,13 @@ export default function EventInbox() {
       await api.acknowledgeEvent(eventId)
       setEvents(events.filter((e) => e.id !== eventId))
       setSelectedEvent(null)
+      
+      // Track acknowledged count in localStorage
+      const currentCount = parseInt(localStorage.getItem('acknowledgedCount') || '0', 10)
+      localStorage.setItem('acknowledgedCount', String(currentCount + 1))
+      
+      // Trigger stats refresh by dispatching custom event
+      window.dispatchEvent(new CustomEvent('eventAcknowledged'))
     } catch (err) {
       if (err instanceof APIError) {
         alert(`Failed to acknowledge event: ${err.message}`)

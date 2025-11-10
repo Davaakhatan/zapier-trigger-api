@@ -16,7 +16,7 @@ export default function QuickStats() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Use stats endpoint which returns both pending and acknowledged counts
+        // Try stats endpoint first
         const stats = await api.getStats()
         
         setStats({
@@ -26,15 +26,18 @@ export default function QuickStats() {
           apiStatus: "healthy",
         })
       } catch (err) {
-        // Fallback to inbox if stats fails
+        // Fallback: use inbox and calculate acknowledged from localStorage
         try {
           const inbox = await api.getInbox({ limit: 100 })
           const pending = inbox.events.filter((e) => e.status === "pending").length
           
+          // Get acknowledged count from localStorage (tracked when events are acknowledged)
+          const acknowledgedCount = parseInt(localStorage.getItem('acknowledgedCount') || '0', 10)
+          
           setStats({
             totalEvents: inbox.total || pending,
             pendingEvents: pending,
-            acknowledgedEvents: 0, // Inbox only shows pending events
+            acknowledgedEvents: acknowledgedCount,
             apiStatus: "healthy",
           })
         } catch (fallbackErr) {
@@ -45,7 +48,17 @@ export default function QuickStats() {
 
     fetchStats()
     const interval = setInterval(fetchStats, 30000)
-    return () => clearInterval(interval)
+    
+    // Listen for event acknowledgments to update count immediately
+    const handleAcknowledged = () => {
+      fetchStats()
+    }
+    window.addEventListener('eventAcknowledged', handleAcknowledged)
+    
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('eventAcknowledged', handleAcknowledged)
+    }
   }, [])
 
   const statCards = [
