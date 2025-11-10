@@ -96,7 +96,7 @@ This frontend connects to the backend API. The backend is in a separate reposito
 
 ## 🚀 Deployment
 
-See [docs/FRONTEND_DEPLOYMENT.md](docs/FRONTEND_DEPLOYMENT.md) for deployment to AWS Amplify.
+See [FRONTEND_DEPLOYMENT.md](FRONTEND_DEPLOYMENT.md) for deployment to AWS Amplify.
 
 ## 🎉 You're All Set!
 

@@ -134,7 +134,7 @@ pnpm dev
 ### Frontend Docs
 - Located in: `zapier-trigger-api/docs/`
 - Deployment: `docs/FRONTEND_DEPLOYMENT.md`
-- Getting started: `GETTING_STARTED.md`
+- Getting started: `docs/GETTING_STARTED.md`
 
 ---
 

@@ -78,9 +78,9 @@ NEXT_PUBLIC_API_URL=https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod
 
 ## Documentation
 
-- **[GETTING_STARTED.md](GETTING_STARTED.md)**: Quick start guide
+- **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)**: Quick start guide
 - **[docs/FRONTEND_DEPLOYMENT.md](docs/FRONTEND_DEPLOYMENT.md)**: AWS Amplify deployment guide
-- **[REPOSITORIES.md](REPOSITORIES.md)**: Repository structure and workflow
+- **[docs/REPOSITORIES.md](docs/REPOSITORIES.md)**: Repository structure and workflow
 - **[docs/PRD.md](docs/PRD.md)**: Product Requirements Document
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**: System architecture
 
