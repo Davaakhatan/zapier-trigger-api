@@ -392,8 +392,8 @@ export default function EventInbox() {
             const isPending = event.status === 'pending'
             
             return (
-              <Card
-                key={event.id}
+            <Card
+              key={event.id}
                 className={`group bg-card border-border/50 cursor-pointer hover:border-primary/50 hover:shadow-md transition-all duration-200 overflow-hidden ${
                   isSelected ? 'border-primary/50 bg-primary/5' : ''
                 }`}
@@ -402,9 +402,9 @@ export default function EventInbox() {
                   if ((e.target as HTMLElement).closest('button')) return
                   setSelectedEvent(selectedEvent === event.id ? null : event.id)
                 }}
-              >
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between gap-4">
+            >
+              <CardContent className="pt-6">
+                <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
                       {isPending && (
                         <button
@@ -421,7 +421,7 @@ export default function EventInbox() {
                           )}
                         </button>
                       )}
-                      <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-3 flex-wrap">
                           <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
@@ -429,28 +429,29 @@ export default function EventInbox() {
                               {event.id.substring(0, 8)}...
                             </h3>
                           </div>
-                      {event.source && (
-                        <Badge variant="outline" className="text-xs font-medium border-primary/20">
+                          {event.source && (
+                            <Badge variant="outline" className="text-xs font-medium border-primary/20">
                         {event.source}
                       </Badge>
-                      )}
-                      <div className="flex items-center gap-2 ml-auto">
+                          )}
+                          <div className="flex items-center gap-2 ml-auto">
                         {getStatusIcon(event.status)}
-                        <span className={`text-xs font-medium capitalize px-2.5 py-1 rounded-full ${getStatusBadge(event.status)}`}>
+                            <span className={`text-xs font-medium capitalize px-2.5 py-1 rounded-full ${getStatusBadge(event.status)}`}>
                           {event.status}
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5" />
-                        {formatTimestamp(event.timestamp)}
-                      </span>
-                    </div>
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5" />
+                            {formatTimestamp(event.timestamp)}
+                          </span>
+                        </div>
+                      </div>
                   </div>
                   <ChevronRight
-                    className={`w-5 h-5 text-muted-foreground transition-all duration-200 flex-shrink-0 group-hover:text-primary ${
-                      selectedEvent === event.id ? "rotate-90 text-primary" : ""
+                      className={`w-5 h-5 text-muted-foreground transition-all duration-200 flex-shrink-0 group-hover:text-primary ${
+                        selectedEvent === event.id ? "rotate-90 text-primary" : ""
                     }`}
                   />
                 </div>
