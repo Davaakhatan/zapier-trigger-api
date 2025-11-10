@@ -4,13 +4,14 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ChevronRight, AlertCircle, CheckCircle2, Clock, Search, Filter, Copy, Check, RefreshCw, Inbox } from "lucide-react"
+import { ChevronRight, AlertCircle, CheckCircle2, Clock, Search, Filter, Copy, Check, RefreshCw, Inbox, Download, Trash2, CheckSquare, Square } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { api, EventItem, APIError } from "@/lib/api"
 import { formatDistanceToNow } from "date-fns"
 
 export default function EventInbox() {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
+  const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set())
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState<string | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
@@ -18,6 +19,7 @@ export default function EventInbox() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [acknowledging, setAcknowledging] = useState<string | null>(null)
+  const [bulkAcknowledging, setBulkAcknowledging] = useState(false)
 
   const fetchEvents = async () => {
     try {
@@ -49,6 +51,11 @@ export default function EventInbox() {
       await api.acknowledgeEvent(eventId)
       setEvents(events.filter((e) => e.id !== eventId))
       setSelectedEvent(null)
+      setSelectedEvents((prev) => {
+        const next = new Set(prev)
+        next.delete(eventId)
+        return next
+      })
       
       // Track acknowledged count in localStorage
       const currentCount = parseInt(localStorage.getItem('acknowledgedCount') || '0', 10)
@@ -65,6 +72,104 @@ export default function EventInbox() {
       console.error("Error acknowledging event:", err)
     } finally {
       setAcknowledging(null)
+    }
+  }
+
+  const handleBulkAcknowledge = async () => {
+    if (selectedEvents.size === 0) return
+    
+    try {
+      setBulkAcknowledging(true)
+      const pendingEvents = Array.from(selectedEvents).filter(id => 
+        events.find(e => e.id === id && e.status === 'pending')
+      )
+      
+      // Acknowledge all selected pending events
+      await Promise.all(pendingEvents.map(id => api.acknowledgeEvent(id)))
+      
+      // Update events and selected set
+      setEvents(events.filter((e) => !selectedEvents.has(e.id)))
+      setSelectedEvents(new Set())
+      setSelectedEvent(null)
+      
+      // Track acknowledged count
+      const currentCount = parseInt(localStorage.getItem('acknowledgedCount') || '0', 10)
+      localStorage.setItem('acknowledgedCount', String(currentCount + pendingEvents.length))
+      
+      // Trigger stats refresh
+      window.dispatchEvent(new CustomEvent('eventAcknowledged'))
+    } catch (err) {
+      if (err instanceof APIError) {
+        alert(`Failed to acknowledge some events: ${err.message}`)
+      } else {
+        alert("Failed to acknowledge events")
+      }
+      console.error("Error acknowledging events:", err)
+    } finally {
+      setBulkAcknowledging(false)
+    }
+  }
+
+  const handleSelectEvent = (eventId: string, checked: boolean) => {
+    setSelectedEvents((prev) => {
+      const next = new Set(prev)
+      if (checked) {
+        next.add(eventId)
+      } else {
+        next.delete(eventId)
+      }
+      return next
+    })
+  }
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const pendingIds = filteredEvents.filter(e => e.status === 'pending').map(e => e.id)
+      setSelectedEvents(new Set(pendingIds))
+    } else {
+      setSelectedEvents(new Set())
+    }
+  }
+
+  const handleExport = (format: 'json' | 'csv') => {
+    const dataToExport = filteredEvents.length > 0 ? filteredEvents : events
+    
+    if (format === 'json') {
+      const json = JSON.stringify(dataToExport, null, 2)
+      const blob = new Blob([json], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `events-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } else if (format === 'csv') {
+      // Convert events to CSV
+      const headers = ['ID', 'Timestamp', 'Source', 'Status', 'Payload']
+      const rows = dataToExport.map(event => [
+        event.id,
+        event.timestamp,
+        event.source || '',
+        event.status,
+        JSON.stringify(event.payload)
+      ])
+      
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      ].join('\n')
+      
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `events-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
     }
   }
 
@@ -146,12 +251,13 @@ export default function EventInbox() {
 
   return (
     <div className="space-y-4">
+      <div className="space-y-3">
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <Input
-            placeholder="Search by source or payload..."
-            className="pl-10 bg-card border-border/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
+              placeholder="Search by source or payload..."
+              className="pl-10 bg-card border-border/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -166,50 +272,167 @@ export default function EventInbox() {
             <Filter className="w-4 h-4" />
             All
           </Button>
-          <Button
-            variant={filterStatus === "pending" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilterStatus(filterStatus === "pending" ? null : "pending")}
-            className={`gap-2 ${filterStatus === "pending" ? getStatusBadge("pending") : ""}`}
-          >
-            <Clock className="w-4 h-4" />
-            <span className="capitalize text-xs">Pending</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchEvents}
-            disabled={loading}
-            className="gap-2 hover:bg-accent transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
+            <Button
+              variant={filterStatus === "pending" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilterStatus(filterStatus === "pending" ? null : "pending")}
+              className={`gap-2 ${filterStatus === "pending" ? getStatusBadge("pending") : ""}`}
+            >
+              <Clock className="w-4 h-4" />
+              <span className="capitalize text-xs">Pending</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchEvents}
+              disabled={loading}
+              className="gap-2 hover:bg-accent transition-colors"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+          </div>
+        </div>
+
+        {/* Bulk Actions Bar */}
+        {selectedEvents.size > 0 && (
+          <div className="flex items-center justify-between p-3 bg-primary/5 border border-primary/20 rounded-lg animate-in slide-in-from-top-2">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-foreground">
+                {selectedEvents.size} event{selectedEvents.size !== 1 ? 's' : ''} selected
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedEvents(new Set())}
+                className="gap-2"
+              >
+                <Square className="w-4 h-4" />
+                Clear
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleBulkAcknowledge}
+                disabled={bulkAcknowledging}
+                className="gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+              >
+                {bulkAcknowledging ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Acknowledging...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    Acknowledge All
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Export Actions */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {filteredEvents.length > 0 && (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExport('json')}
+                  className="gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Export JSON
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExport('csv')}
+                  className="gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Export CSV
+                </Button>
+              </div>
+            )}
+          </div>
+          <div className="text-sm text-muted-foreground">
+            {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''}
+          </div>
         </div>
       </div>
 
       <div className="space-y-4">
-        {filteredEvents.length > 0 ? (
-          filteredEvents.map((event) => (
-            <Card
-              key={event.id}
-              className="group bg-card border-border/50 cursor-pointer hover:border-primary/50 hover:shadow-md transition-all duration-200 overflow-hidden"
-              onClick={() => setSelectedEvent(selectedEvent === event.id ? null : event.id)}
+        {filteredEvents.length > 0 && (
+          <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleSelectAll(selectedEvents.size < filteredEvents.filter(e => e.status === 'pending').length)}
+              className="gap-2 h-8"
             >
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-3 flex-wrap">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                        <h3 className="font-mono text-sm font-semibold text-foreground">
-                          {event.id.substring(0, 8)}...
-                        </h3>
-                      </div>
+              {selectedEvents.size === filteredEvents.filter(e => e.status === 'pending').length ? (
+                <CheckSquare className="w-4 h-4" />
+              ) : (
+                <Square className="w-4 h-4" />
+              )}
+              <span className="text-xs">Select All Pending</span>
+            </Button>
+          </div>
+        )}
+
+        {filteredEvents.length > 0 ? (
+          filteredEvents.map((event) => {
+            const isSelected = selectedEvents.has(event.id)
+            const isPending = event.status === 'pending'
+            
+            return (
+              <Card
+                key={event.id}
+                className={`group bg-card border-border/50 cursor-pointer hover:border-primary/50 hover:shadow-md transition-all duration-200 overflow-hidden ${
+                  isSelected ? 'border-primary/50 bg-primary/5' : ''
+                }`}
+                onClick={(e) => {
+                  // Don't toggle selection if clicking checkbox
+                  if ((e.target as HTMLElement).closest('button')) return
+                  setSelectedEvent(selectedEvent === event.id ? null : event.id)
+                }}
+              >
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      {isPending && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleSelectEvent(event.id, !isSelected)
+                          }}
+                          className="mt-1 flex-shrink-0"
+                        >
+                          {isSelected ? (
+                            <CheckSquare className="w-5 h-5 text-primary" />
+                          ) : (
+                            <Square className="w-5 h-5 text-muted-foreground hover:text-primary transition-colors" />
+                          )}
+                        </button>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-3 flex-wrap">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                            <h3 className="font-mono text-sm font-semibold text-foreground">
+                              {event.id.substring(0, 8)}...
+                            </h3>
+                          </div>
                       {event.source && (
                         <Badge variant="outline" className="text-xs font-medium border-primary/20">
-                          {event.source}
-                        </Badge>
+                        {event.source}
+                      </Badge>
                       )}
                       <div className="flex items-center gap-2 ml-auto">
                         {getStatusIcon(event.status)}
@@ -300,8 +523,8 @@ export default function EventInbox() {
                               Acknowledge Event
                             </>
                           )}
-                        </Button>
-                      </div>
+                      </Button>
+                    </div>
                     )}
                   </div>
                 )}
