@@ -8,6 +8,12 @@ import Header from "@/components/header"
 import Navigation from "@/components/navigation"
 import EventTimeline from "@/components/event-timeline"
 import EventDetailsModal from "@/components/event-details-modal"
+import EventTrendsChart from "@/components/event-trends-chart"
+import EventSourcesChart from "@/components/event-sources-chart"
+import PerformanceMetrics from "@/components/performance-metrics"
+import RateLimitingIndicators from "@/components/rate-limiting-indicators"
+import RecentActivity from "@/components/recent-activity"
+import APIKeyManagement from "@/components/api-key-management"
 import { api, EventItem, APIError } from "@/lib/api"
 import { useEffect } from "react"
 
@@ -53,7 +59,23 @@ export default function Home() {
               <p className="text-muted-foreground text-lg">Real-time event ingestion and workflow management</p>
             </div>
 
+            {/* Quick Stats Cards */}
             <QuickStats />
+
+            {/* Event Trends Chart */}
+            <EventTrendsChart />
+
+            {/* Event Sources & Performance Metrics */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <EventSourcesChart />
+              <PerformanceMetrics />
+            </div>
+
+            {/* Rate Limiting Indicators */}
+            <RateLimitingIndicators />
+
+            {/* Recent Activity */}
+            <RecentActivity />
           </div>
         )}
 
@@ -140,6 +162,12 @@ export default function Home() {
               <p className="text-muted-foreground text-lg">Integration guide and reference</p>
             </div>
             <APIDocumentation />
+          </div>
+        )}
+
+        {activeTab === "settings" && (
+          <div className="p-6 md:p-8 lg:p-12 max-w-7xl mx-auto animate-in fade-in-50 duration-500">
+            <APIKeyManagement />
           </div>
         )}
       </main>

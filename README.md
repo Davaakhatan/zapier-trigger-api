@@ -71,10 +71,35 @@ NEXT_PUBLIC_API_URL=https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod
 
 ## Features
 
-- **Dashboard**: Overview with stats
-- **Inbox**: View and manage pending events
-- **API Docs**: Integration documentation
-- **Real-time**: Auto-refreshes every 30 seconds
+### Dashboard
+- **Quick Stats**: Total, Pending, Acknowledged events, API Status
+- **Event Trends Chart**: 24-hour timeline visualization
+- **Event Sources Breakdown**: Pie chart showing events by source
+- **Performance Metrics**: Response time, success rate, events per minute
+- **Rate Limiting Indicators**: Real-time API usage monitoring
+- **Recent Activity Feed**: Live event activity stream
+
+### Inbox
+- View and manage pending events
+- Search and filter events
+- Bulk operations (select multiple, acknowledge all)
+- Export events (JSON/CSV)
+- Real-time auto-refresh (every 30 seconds)
+
+### Timeline
+- Chronological view of all events
+- Visual timeline with time periods
+- Event details modal
+
+### API Documentation
+- Interactive API reference
+- Integration examples
+- Endpoint documentation
+
+### Settings
+- API Key Management
+- Create, view, copy, and revoke API keys
+- Rate limit information
 
 ## Documentation
 
@@ -132,7 +157,10 @@ pnpm lint
 ### Project Status
 
 - ✅ Next.js frontend implemented
-- ✅ Event inbox component
+- ✅ Enhanced dashboard with charts and analytics
+- ✅ Event inbox with search, filter, and bulk operations
+- ✅ Event timeline view
+- ✅ API key management
 - ✅ API client integration
 - ✅ Real-time updates
 - ✅ AWS Amplify deployment ready

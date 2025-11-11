@@ -269,9 +269,16 @@ aws lambda update-function-configuration \
 
 ### Production Environment
 
+**Required Environment Variable:**
 ```bash
 NEXT_PUBLIC_API_URL=https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod
 ```
+
+**How to Set in Amplify:**
+1. Go to **Amplify Console** → Your App → **Environment variables**
+2. Add/Update: `NEXT_PUBLIC_API_URL`
+3. Value: `https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod`
+4. Save and **Redeploy**
 
 ### Development Environment (Local)
 
@@ -284,6 +291,18 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ```typescript
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 ```
+
+### New Features After Deployment
+
+Once deployed to Amplify, the enhanced dashboard will include:
+- ✅ Event Trends Chart (24-hour timeline)
+- ✅ Event Sources Breakdown (pie chart)
+- ✅ Performance Metrics (response time, success rate)
+- ✅ Rate Limiting Indicators (API usage monitoring)
+- ✅ Recent Activity Feed (live event stream)
+- ✅ API Key Management (Settings page)
+
+**Note**: Local development won't show real data unless connected to deployed backend or local backend is running.
 
 ---
 

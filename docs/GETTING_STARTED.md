@@ -1,11 +1,14 @@
-# Getting Started: Frontend Application
+# Getting Started: Zapier Triggers API Frontend
 
 ## 🎯 Overview
 
-This is the **frontend repository** for the Zapier Triggers API.
+This is the **frontend repository** for the Zapier Triggers API - a Next.js dashboard for visualizing and managing events.
 
-- **Frontend**: Next.js dashboard for visualizing and managing events
+- **Frontend**: Next.js dashboard with enhanced analytics
 - **Backend**: Separate repository at https://github.com/Davaakhatan/zapier-trigger-api-backend
+- **API Endpoint**: `https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod`
+
+---
 
 ## 🚀 Quick Start
 
@@ -14,91 +17,212 @@ This is the **frontend repository** for the Zapier Triggers API.
 - Node.js 18+ and pnpm installed
 - Backend API running (or use deployed API)
 
-### Run Frontend Locally
+### Local Development
+
+1. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
+
+2. **Configure API endpoint** (optional)
+   
+   Create `.env.local` in project root:
+   ```env
+   # Use deployed API (recommended for testing UI)
+   NEXT_PUBLIC_API_URL=https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod
+   
+   # OR use local backend (if running locally)
+   # NEXT_PUBLIC_API_URL=http://localhost:8000
+   ```
+   
+   **Note**: If no `.env.local` exists, defaults to `http://localhost:8000`
+
+3. **Run development server**
+   ```bash
+   pnpm dev
+   ```
+
+4. **Access the application**
+   - Frontend Dashboard: http://localhost:3000
+
+---
+
+## 🎨 Features
+
+### Dashboard
+- **Quick Stats**: Total, Pending, Acknowledged events, API Status
+- **Event Trends Chart**: 24-hour timeline visualization
+- **Event Sources Breakdown**: Pie chart showing events by source
+- **Performance Metrics**: Response time, success rate, events per minute
+- **Rate Limiting Indicators**: Real-time API usage monitoring
+- **Recent Activity Feed**: Live event activity stream
+
+### Inbox
+- View and manage pending events
+- Search and filter events
+- Bulk operations (select multiple, acknowledge all)
+- Export events (JSON/CSV)
+- Real-time auto-refresh (every 30 seconds)
+
+### Timeline
+- Chronological view of all events
+- Visual timeline with time periods
+- Event details modal
+
+### API Documentation
+- Interactive API reference
+- Integration examples
+- Endpoint documentation
+
+### Settings
+- API Key Management
+- Create, view, copy, and revoke API keys
+- Rate limit information
+
+---
+
+## 🧪 Testing Locally
+
+### Option 1: Frontend Only (Using Deployed Backend)
+
+Easiest way to test the frontend with real data:
 
 ```bash
-# Install dependencies
-pnpm install
+# Create .env.local pointing to deployed API
+echo "NEXT_PUBLIC_API_URL=https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod" > .env.local
 
-# Run development server
+# Start frontend
 pnpm dev
 ```
 
-**Frontend will be available at:**
-- Dashboard: http://localhost:3000
+**Note**: Local development won't show real data unless connected to deployed backend or local backend is running.
 
-### Configure API Endpoint
+### Option 2: Full Stack (Frontend + Backend Locally)
 
-The frontend connects to the backend API. By default, it uses:
-- Local development: `http://localhost:8000`
-- Production: Set via `NEXT_PUBLIC_API_URL` environment variable
+If you want to run both frontend and backend locally:
 
-To use a different backend URL, create `.env.local`:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
+1. **Start Backend** (in backend repository):
+   ```bash
+   cd ../zapier-trigger-api-backend
+   # Follow backend setup instructions
+   # Backend should run on http://localhost:8000
+   ```
+
+2. **Start Frontend**:
+   ```bash
+   # Create .env.local to use local backend
+   echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
+   
+   # Start frontend
+   pnpm dev
+   ```
+
+### Create Test Events
+
+Create events using the backend API:
+
+```bash
+curl -X POST https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod/v1/events \
+  -H "Content-Type: application/json" \
+  -d '{
+    "payload": {
+      "test": "data",
+      "value": 123
+    },
+    "source": "test-source",
+    "tags": ["test", "demo"]
+  }'
 ```
 
-Or use the deployed API:
-```env
-NEXT_PUBLIC_API_URL=https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod
+---
+
+## 🔧 Troubleshooting
+
+### Frontend won't start
+
+```bash
+# Make sure dependencies are installed
+pnpm install
+
+# Clear Next.js cache
+rm -rf .next
+
+# Try again
+pnpm dev
 ```
 
-## 📝 Testing the Application
+### Can't connect to backend
 
-### 1. View Events in Frontend
+1. **Check API URL**:
+   - Default: `http://localhost:8000` (local)
+   - Or: `https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod` (deployed)
 
-1. Open http://localhost:3000
-2. Click on "Inbox" tab
-3. View pending events from the backend API
+2. **Check `.env.local`**:
+   ```bash
+   cat .env.local
+   # Should show: NEXT_PUBLIC_API_URL=...
+   ```
 
-### 2. Acknowledge an Event
+3. **Check browser console** for CORS errors
 
-- Click on an event in the inbox
-- Click "Acknowledge" button
-- The event will be removed from the pending list
+### No events showing
 
-### 3. Create Events
+1. Create some events using the API (see above)
+2. Refresh the inbox
+3. Check browser console for errors
 
-Use the backend API to create events (see backend repository documentation).
+---
 
-## 🎨 Frontend Features
+## 📝 Development Commands
 
-- **Dashboard**: Overview with stats
-- **Inbox**: View and manage pending events (connected to backend API)
-- **API Docs**: Integration documentation
-- **Real-time**: Auto-refreshes every 30 seconds
+```bash
+# Start development server
+pnpm dev
 
-## 🔍 Important Notes
+# Build for production
+pnpm build
 
-- **Backend is PRD-compliant**: The Python FastAPI backend matches all PRD requirements
-- **Frontend is optional**: The PRD doesn't require a frontend, but it's useful for visualization
-- **Frontend connects to backend**: All data comes from the Python FastAPI API
+# Start production server
+pnpm start
 
-## 🎨 Frontend Features
+# Lint code
+pnpm lint
+```
 
-- **Dashboard**: Overview with stats
-- **Inbox**: View and manage pending events (connected to backend API)
-- **API Docs**: Integration documentation
-- **Real-time**: Auto-refreshes every 30 seconds
-
-## 🔗 Backend Connection
-
-This frontend connects to the backend API. The backend is in a separate repository:
-- **Backend Repo**: https://github.com/Davaakhatan/zapier-trigger-api-backend
-- **API Endpoint**: https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod
-
-## ✅ What's Working
-
-- ✅ Frontend Dashboard (Next.js)
-- ✅ Event retrieval and acknowledgment
-- ✅ Real-time updates
-- ✅ Connected to backend API
+---
 
 ## 🚀 Deployment
 
-See [FRONTEND_DEPLOYMENT.md](FRONTEND_DEPLOYMENT.md) for deployment to AWS Amplify.
+See [FRONTEND_DEPLOYMENT.md](FRONTEND_DEPLOYMENT.md) for AWS Amplify deployment guide.
 
-## 🎉 You're All Set!
+**Quick Steps:**
+1. Push code to GitHub
+2. Connect repository to AWS Amplify
+3. Set environment variable: `NEXT_PUBLIC_API_URL`
+4. Deploy!
 
-Your frontend is ready to use!
+---
 
+## 📚 Documentation
+
+- **[FRONTEND_DEPLOYMENT.md](FRONTEND_DEPLOYMENT.md)**: AWS Amplify deployment guide
+- **[REPOSITORIES.md](REPOSITORIES.md)**: Repository structure and workflow
+- **[ARCHITECTURE.md](ARCHITECTURE.md)**: System architecture
+- **[PRD.md](PRD.md)**: Product Requirements Document
+
+---
+
+## ✅ What's Working
+
+- ✅ Enhanced Dashboard with charts and analytics
+- ✅ Event inbox with search, filter, and bulk operations
+- ✅ Event timeline view
+- ✅ API key management
+- ✅ Real-time updates
+- ✅ Connected to backend API
+- ✅ AWS Amplify deployment ready
+
+---
+
+**Backend Repository**: https://github.com/Davaakhatan/zapier-trigger-api-backend  
+**API Endpoint**: https://b6su7oge4f.execute-api.us-east-1.amazonaws.com/prod
