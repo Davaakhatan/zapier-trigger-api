@@ -71,57 +71,35 @@ export default function EventTimeline({ events, onEventClick }: EventTimelinePro
     return new Date(b).getTime() - new Date(a).getTime()
   })
 
-  // Calculate stats for this timeline
-  const stats = {
-    total: allEvents.length,
-    pending: allEvents.filter(e => e.status === 'pending').length,
-    acknowledged: allEvents.filter(e => e.status === 'acknowledged').length,
-  }
+  // Calculate contextual stats for this timeline view
+  const eventsInView = allEvents.length
+  const pendingInView = allEvents.filter(e => e.status === 'pending').length
 
   return (
     <div className="space-y-8">
-      {/* Timeline Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* Timeline Context Info - Not duplicate stats, just view context */}
+      {eventsInView > 0 && (
         <Card className="bg-card border-border/50">
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/10">
-                <Activity className="w-5 h-5 text-blue-500" />
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Activity className="w-4 h-4" />
+                <span>
+                  Showing <span className="font-semibold text-foreground">{eventsInView}</span> event{eventsInView !== 1 ? 's' : ''} in timeline
+                  {pendingInView > 0 && (
+                    <span className="ml-2">
+                      • <span className="font-semibold text-yellow-500">{pendingInView}</span> pending
+                    </span>
+                  )}
+                </span>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Total Events</p>
-                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
-              </div>
+              <Badge variant="outline" className="text-xs">
+                {sortedGroups.length} time period{sortedGroups.length !== 1 ? 's' : ''}
+              </Badge>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border/50">
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-yellow-500/10">
-                <Clock className="w-5 h-5 text-yellow-500" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold text-foreground">{stats.pending}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card border-border/50">
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-500/10">
-                <CheckCircle2 className="w-5 h-5 text-green-500" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Acknowledged</p>
-                <p className="text-2xl font-bold text-foreground">{stats.acknowledged}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      )}
 
       {/* Timeline Groups */}
       {sortedGroups.length === 0 ? (

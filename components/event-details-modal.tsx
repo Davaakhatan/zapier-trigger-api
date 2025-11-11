@@ -25,6 +25,11 @@ export default function EventDetailsModal({
 
   if (!event) return null
 
+  // Debug: Log event status and onAcknowledge availability
+  if (process.env.NODE_ENV === 'development') {
+    console.log('EventDetailsModal - Event status:', event.status, 'onAcknowledge:', !!onAcknowledge)
+  }
+
   const copyToClipboard = (text: any) => {
     navigator.clipboard.writeText(JSON.stringify(text, null, 2))
     setCopied(true)
@@ -126,12 +131,16 @@ export default function EventDetailsModal({
           </div>
 
           {/* Actions */}
-          {event.status === "pending" && onAcknowledge && (
+          {event.status === "pending" && onAcknowledge ? (
             <div className="flex gap-2 pt-4 border-t border-border/50">
               <Button
                 variant="default"
                 size="sm"
-                onClick={() => onAcknowledge(event.id)}
+                onClick={async () => {
+                  if (onAcknowledge) {
+                    await onAcknowledge(event.id)
+                  }
+                }}
                 disabled={acknowledging === event.id}
                 className="gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
               >
@@ -148,7 +157,11 @@ export default function EventDetailsModal({
                 )}
               </Button>
             </div>
-          )}
+          ) : event.status === "pending" && !onAcknowledge ? (
+            <div className="pt-4 border-t border-border/50 text-sm text-muted-foreground">
+              Acknowledge handler not available
+            </div>
+          ) : null}
         </CardContent>
       </Card>
     </div>
